@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate - Support Our Cause</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --accent: #22c55e;
+            --text: #1e293b;
+            --bg: #f1f5f9;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); padding: 20px; color: var(--text); }
+        
+        .donation-card { 
+            max-width: 450px; margin: 40px auto; background: white; 
+            padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+        }
+
+        h2, h1 { margin-top: 0; color: var(--primary); text-align: center; }
+        p { text-align: center; color: #64748b; margin-bottom: 25px; }
+        
+        .donation-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+
+        .amount-option {
+            position: relative;
+            padding: 15px; border: 2px solid #e2e8f0; border-radius: 10px;
+            cursor: pointer; text-align: center; font-weight: 600; transition: all 0.2s;
+        }
+
+        /* Hide actual radio input */
+        input[type="radio"] { display: none; }
+        
+        /* Highlight state */
+        input[type="radio"]:checked + span { color: var(--primary); }
+        input[type="radio"]:checked + .amount-option, 
+        .amount-option:has(input:checked) { border-color: var(--primary); background: #eff6ff; }
+
+        label { display: block; margin-bottom: 8px; font-weight: 500; }
+
+        input[type="number"], input[type="text"], input[type="email"] {
+            width: 100%; padding: 14px; margin-bottom: 20px; border: 2px solid #e2e8f0;
+            border-radius: 8px; box-sizing: border-box; font-size: 16px;
+        }
+
+        .submit-btn {
+            width: 100%; padding: 16px; background: var(--accent); color: white;
+            border: none; border-radius: 8px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: background 0.3s;
+        }
+
+        .submit-btn:hover { background: #16a34a; }
+    </style>
+</head>
+<body>
+
+<div class="donation-card">
+    <h1>Support eliezerkenya, co</h1>
+    <p>Select an amount or enter your own in KSH.</p>
+
+    <form id="donationForm">
+        <label>Select Amount (KSH):</label>
+        <div class="donation-grid" id="presetContainer">
+            <label class="amount-option"><input type="radio" name="amount" value="50"> <span>50</span></label>
+            <label class="amount-option"><input type="radio" name="amount" value="100"> <span>100</span></label>
+            <label class="amount-option"><input type="radio" name="amount" value="500"> <span>500</span></label>
+            <label class="amount-option"><input type="radio" name="amount" value="1000"> <span>1,000</span></label>
+        </div>
+
+        <label for="customAmount">Or enter custom amount (KSH):</label>
+        <input type="number" id="customAmount" name="customAmount" placeholder="e.g. 750">
+
+        <label>Full Name:</label>
+        <input type="text" name="name" required placeholder="John Doe">
+
+        <label>Phone Number (M-Pesa):</label>
+        <input type="text" name="phone" required placeholder="07XX XXX XXX">
+
+        <button type="submit" class="submit-btn">Donate Now</button>
+    </form>
+</div>
+
+<script>
+    const customInput = document.getElementById('customAmount');
+    const radios = document.getElementsByName('amount');
+
+    // If user types in custom amount, clear radio selections
+    customInput.addEventListener('input', () => {
+        if (customInput.value.length > 0) {
+            radios.forEach(radio => radio.checked = false);
+        }
+    });
+
+    // If user clicks a radio button, clear the custom amount field
+    radios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.checked) {
+                customInput.value = '';
+            }
+        });
+    });
+
+    // Handle Form Submission
+    document.getElementById('donationForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        let finalAmount = customInput.value || document.querySelector('input[name="amount"]:checked')?.value;
+
+        if (!finalAmount) {
+            alert("Please select or enter an amount.");
+            return;
+        }
+
+        alert(`Processing donation of KSH ${finalAmount} via M-Pesa...`);
+        // Here you would trigger your Payment Gateway SDK
+    });
+</script>
+
+</body>
+</html>

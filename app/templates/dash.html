@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-Pesa Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #4caf50;
+            --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font); background-color: var(--bg); color: var(--text-main); padding: 40px 20px; }
+        .container { max-width: 1200px; margin: 0 auto; width: 100%; }
+        
+        .header { margin-bottom: 32px; }
+        .header h1 { font-size: 28px; font-weight: 700; }
+        .header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+
+        /* Responsive Chart Layout Grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .chart-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 24px;
+            min-height: 380px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 20px; color: var(--text-muted); }
+        .chart-container { position: relative; flex-grow: 1; width: 100%; height: 100%; }
+
+        /* Dynamic Table Custom Component Styling */
+        .table-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .table-card h3 { padding: 24px 24px 12px 24px; font-size: 16px; font-weight: 600; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th { background-color: #f1f5f9; color: var(--text-muted); font-weight: 600; padding: 14px 24px; border-bottom: 1px solid var(--border); }
+        td { padding: 16px 24px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        tr:last-child td { border-bottom: none; }
+        
+        /* Interactive Badge Components */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+        .badge.success { background-color: #e8f5e9; color: #2e7d32; }
+        .badge.failed { background-color: #ffebee; color: #c62828; }
+        .badge.pending { background-color: #fef3c7; color: #d97706; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Payment history overview</h1>
+            <p>Real-time structural transaction analysis and execution audits.</p>
+        </div>
+
+        <!-- 1. Visualization Analytics Layer -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h3>Transaction Breakdown Status</h3>
+                <div class="chart-container">
+                    <canvas id="statusPieChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>Revenue Stream Allocation per Reference (KES)</h3>
+                <div class="chart-container">
+                    <canvas id="revenueBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Relational Ledger Table Data Layer -->
+        <div class="table-card">
+            <h3>Detailed Master Settlement Ledger</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Handset Target</th>
+                            <th>Reference Key</th>
+                            <th>Amount (KES)</th>
+                            <th>M-Pesa Session ID</th>
+                            <th>Settlement Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Loop through database context lists using Jinja tags -->
+                        {% for payment in payments %}
+                        <tr>
+                            <td><strong>#{{ payment.id }}</strong></td>
+                            <td>{{ payment.phone_number }}</td>
+                            <td>{{ payment.reference }}</td>
+                            <td>{{ "{:,.2f}".format(payment.amount) }}</td>
+                            <td><code style="font-family: monospace; color: #64748b;">{{ payment.checkout_request_id }}</code></td>
+                            <td><span class="badge {{ payment.status }}">{{ payment.status }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">No transaction history strings verified inside local tables.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Chart.js Execution Core Engine Configuration -->
+    <script>
+        // Mount Asynchronous Status Allocation Pie Visualizer
+        const pieCtx = document.getElementById('statusPieChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: {{ pie_labels | tojson }},
+                datasets: [{
+                    data: {{ pie_data | tojson }},
+                    backgroundColor: ['#4caf50', '#ef5350', '#f6ad55'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'inherit' } } }
+                }
+            }
+        });
+
+        // Mount Aggregated Category Account Bar Visualizer
+        const barCtx = document.getElementById('revenueBarChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ bar_labels | tojson }},
+                datasets: [{
+                    label: 'Successful KES Volume',
+                    data: {{ bar_data | tojson }},
+                    backgroundColor: '#439a46',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
